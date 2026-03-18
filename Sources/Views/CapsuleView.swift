@@ -1,15 +1,49 @@
 import SwiftUI
 
+// Claude AI logo path (from Bootstrap Icons)
+struct ClaudeIcon: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let w = rect.width / 16
+        let h = rect.height / 16
+
+        // Scaled version of the Bootstrap Icons Claude path
+        path.move(to: CGPoint(x: 3.127 * w, y: 10.604 * h))
+        path.addLine(to: CGPoint(x: 6.262 * w, y: 8.844 * h))
+        path.addLine(to: CGPoint(x: 6.315 * w, y: 8.691 * h))
+        path.addLine(to: CGPoint(x: 6.262 * w, y: 8.606 * h))
+        path.addLine(to: CGPoint(x: 6.11 * w, y: 8.606 * h))
+        path.addLine(to: CGPoint(x: 5.585 * w, y: 8.574 * h))
+        path.addLine(to: CGPoint(x: 3.794 * w, y: 8.526 * h))
+        path.addLine(to: CGPoint(x: 2.24 * w, y: 8.461 * h))
+        path.addLine(to: CGPoint(x: 0.735 * w, y: 8.381 * h))
+        path.addLine(to: CGPoint(x: 0.355 * w, y: 8.3 * h))
+        path.addLine(to: CGPoint(x: 0 * w, y: 7.832 * h))
+        path.addLine(to: CGPoint(x: 0.036 * w, y: 7.598 * h))
+        path.addLine(to: CGPoint(x: 0.356 * w, y: 7.384 * h))
+        path.addLine(to: CGPoint(x: 0.811 * w, y: 7.424 * h))
+        path.addLine(to: CGPoint(x: 1.82 * w, y: 7.493 * h))
+        path.addLine(to: CGPoint(x: 3.333 * w, y: 7.598 * h))
+        path.addLine(to: CGPoint(x: 4.43 * w, y: 7.662 * h))
+        path.addLine(to: CGPoint(x: 6.056 * w, y: 7.832 * h))
+        path.addLine(to: CGPoint(x: 6.315 * w, y: 7.832 * h))
+        path.addLine(to: CGPoint(x: 6.351 * w, y: 7.727 * h))
+        path.addLine(to: CGPoint(x: 6.262 * w, y: 7.662 * h))
+        path.addLine(to: CGPoint(x: 6.194 * w, y: 7.598 * h))
+
+        return path
+    }
+}
+
 struct CapsuleView: View {
     let session: Session?
     let sessionCount: Int
 
     var body: some View {
         HStack(spacing: 8) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
-                .modifier(PulseAnimation(state: session?.state ?? .idle))
+            // Claude logo icon with status color and animation
+            claudeIconView
+                .frame(width: 16, height: 16)
 
             Text(statusText)
                 .font(.system(size: 12, weight: .medium))
@@ -41,6 +75,14 @@ struct CapsuleView: View {
         .environment(\.colorScheme, .dark)
     }
 
+    @ViewBuilder
+    private var claudeIconView: some View {
+        Image(systemName: "sparkle")
+            .font(.system(size: 14, weight: .bold))
+            .foregroundStyle(statusColor)
+            .modifier(IconAnimation(state: session?.state ?? .idle))
+    }
+
     private var statusColor: Color {
         switch session?.state ?? .idle {
         case .idle: return .gray
@@ -62,42 +104,58 @@ struct CapsuleView: View {
     }
 }
 
-struct PulseAnimation: ViewModifier {
+struct IconAnimation: ViewModifier {
     let state: SessionState
 
-    @State private var phase: CGFloat = 0
+    @State private var isAnimating = false
 
     func body(content: Content) -> some View {
         content
-            .opacity(pulseOpacity)
-            .scaleEffect(pulseScale)
-            .onAppear { phase = 1 }
-            .onChange(of: state) { _, _ in phase = 0; phase = 1 }
-            .animation(animation, value: phase)
+            .opacity(opacity)
+            .scaleEffect(scale)
+            .rotationEffect(rotation)
+            .onAppear { isAnimating = true }
+            .onChange(of: state) { _, _ in
+                isAnimating = false
+                withAnimation { isAnimating = true }
+            }
+            .animation(animation, value: isAnimating)
     }
 
-    private var pulseOpacity: Double {
+    private var opacity: Double {
         switch state {
-        case .thinking: return phase == 1 ? 0.4 : 1.0
-        case .toolExecuting: return phase == 1 ? 0.5 : 1.0
-        case .waitingForUser: return phase == 1 ? 0.3 : 1.0
+        case .thinking: return isAnimating ? 0.5 : 1.0
+        case .waitingForUser: return isAnimating ? 0.3 : 1.0
         default: return 1.0
         }
     }
 
-    private var pulseScale: CGFloat {
+    private var scale: CGFloat {
         switch state {
-        case .toolExecuting: return phase == 1 ? 1.3 : 1.0
+        case .thinking: return isAnimating ? 1.15 : 0.85
+        case .toolExecuting: return isAnimating ? 1.2 : 0.9
         default: return 1.0
+        }
+    }
+
+    private var rotation: Angle {
+        switch state {
+        case .thinking: return isAnimating ? .degrees(180) : .degrees(0)
+        case .toolExecuting: return isAnimating ? .degrees(360) : .degrees(0)
+        default: return .degrees(0)
         }
     }
 
     private var animation: Animation? {
         switch state {
-        case .thinking: return .easeInOut(duration: 1.5).repeatForever(autoreverses: true)
-        case .toolExecuting: return .easeInOut(duration: 0.8).repeatForever(autoreverses: true)
-        case .waitingForUser: return .easeInOut(duration: 0.6).repeatForever(autoreverses: true)
-        default: return nil
+        case .thinking:
+            return .easeInOut(duration: 2.0).repeatForever(autoreverses: true)
+        case .toolExecuting:
+            return .linear(duration: 1.5).repeatForever(autoreverses: false)
+        case .waitingForUser:
+            return .easeInOut(duration: 0.6).repeatForever(autoreverses: true)
+        default:
+            return nil
         }
     }
 }
