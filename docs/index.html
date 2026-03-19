@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClaudePulse — Dynamic Island for Claude Code</title>
+  <meta name="description" content="A macOS menu bar app that brings Dynamic Island-inspired real-time monitoring to your Claude Code sessions.">
+  <style>
+    :root {
+      --purple: #b366ff;
+      --purple-dim: rgba(179, 102, 255, 0.15);
+      --orange: #ff9f43;
+      --orange-dim: rgba(255, 159, 67, 0.15);
+      --bg: #0a0a0f;
+      --surface: #14141f;
+      --surface-2: #1e1e2e;
+      --text: #e8e8f0;
+      --text-dim: #8888a0;
+      --border: rgba(255,255,255,0.06);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(179, 102, 255, 0.08), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 60%, rgba(255, 159, 67, 0.04), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Nav */
+    nav {
+      padding: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--purple), #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+
+    nav a.gh-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    nav a.gh-link:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--purple-dim);
+      color: var(--purple);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(179, 102, 255, 0.2);
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--purple);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    h1 .gradient {
+      background: linear-gradient(135deg, var(--purple), #d4a5ff, var(--orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-dim);
+      max-width: 540px;
+      margin: 0 auto 36px;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), #8b5cf6);
+      color: white;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #282840;
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    .btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* Demo — macOS desktop with Dynamic Island */
+    .demo {
+      margin: 60px auto 0;
+      max-width: 700px;
+    }
+
+    .desktop-mockup {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* macOS-style wallpaper background */
+    .desktop-bg {
+      width: 100%;
+      height: 420px;
+      background:
+        radial-gradient(ellipse 120% 80% at 30% 90%, rgba(88, 28, 135, 0.6), transparent 60%),
+        radial-gradient(ellipse 100% 70% at 70% 80%, rgba(30, 58, 138, 0.5), transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 50%, rgba(15, 23, 42, 0.8), transparent),
+        linear-gradient(180deg, #0f172a 0%, #1e1b4b 40%, #312e81 70%, #1e1b4b 100%);
+      position: relative;
+    }
+
+    /* macOS menu bar */
+    .desktop-menubar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 28px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .menubar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menubar-apple {
+      font-size: 15px;
+    }
+
+    .menubar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .menubar-sparkle {
+      font-size: 14px;
+      color: var(--purple);
+    }
+
+    /* Dynamic Island — Capsule state */
+    .island-container {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .island-capsule {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(10, 10, 18, 0.92);
+      padding: 7px 16px 7px 9px;
+      border-radius: 22px;
+      font-size: 13px;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,0.4),
+        0 0 0 0.5px rgba(255,255,255,0.06),
+        0 8px 32px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    }
+
+    .island-icon {
+      width: 26px;
+      height: 26px;
+      background: linear-gradient(135deg, var(--purple), #8b5cf6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .island-icon svg {
+      width: 13px;
+      height: 13px;
+      fill: white;
+    }
+
+    .island-project {
+      font-weight: 500;
+    }
+
+    .island-state-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--purple);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .island-time {
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+    }
+
+    /* Dynamic Island — Expanded state */
+    .island-expanded {
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      background: rgba(10, 10, 18, 0.92);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.5),
+        0 0 0 0.5px rgba(255,255,255,0.06),
+        0 12px 48px rgba(0,0,0,0.4);
+    }
+
+    .island-expanded-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px 6px;
+    }
+
+    .island-expanded .session-row {
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .island-expanded .session-row.active {
+      background: rgba(179, 102, 255, 0.06);
+    }
+
+    .session-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .session-dot.working { background: var(--purple); }
+    .session-dot.waiting { background: var(--orange); }
+    .session-dot.idle { background: #555; }
+
+    .session-info { flex: 1; min-width: 0; }
+
+    .session-name {
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .session-label {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 400;
+    }
+
+    .session-label.working {
+      background: var(--purple-dim);
+      color: var(--purple);
+    }
+
+    .session-label.waiting {
+      background: var(--orange-dim);
+      color: var(--orange);
+    }
+
+    .session-path {
+      font-size: 11px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-time {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    /* Demo labels */
+    .demo-states {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .demo-state-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .demo-state-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .demo-state-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      text-align: center;
+      max-width: 160px;
+    }
+
+    /* Features */
+    .features {
+      padding: 80px 0;
+    }
+
+    .features h2 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 48px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(179, 102, 255, 0.2);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    .feature-icon.purple { background: var(--purple-dim); }
+    .feature-icon.orange { background: var(--orange-dim); }
+    .feature-icon.blue { background: rgba(96, 165, 250, 0.15); }
+    .feature-icon.green { background: rgba(52, 211, 153, 0.15); }
+
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* States section */
+    .states {
+      padding: 60px 0 80px;
+    }
+
+    .states h2 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .states > .container > p {
+      text-align: center;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .state-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .state-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .state-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .state-dot.purple {
+      background: var(--purple);
+      box-shadow: 0 0 12px rgba(179, 102, 255, 0.5);
+    }
+
+    .state-dot.orange {
+      background: var(--orange);
+      box-shadow: 0 0 12px rgba(255, 159, 67, 0.5);
+    }
+
+    .state-dot.gray { background: #666; }
+    .state-dot.dim { background: #444; opacity: 0.5; }
+
+    .state-text h4 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .state-text p {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* Install */
+    .install {
+      padding: 60px 0 80px;
+    }
+
+    .install h2 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 40px;
+    }
+
+    .install-steps {
+      max-width: 560px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--purple-dim);
+      color: var(--purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      margin-top: 8px;
+      color: var(--purple);
+      overflow-x: auto;
+    }
+
+    /* Tech */
+    .tech {
+      padding: 40px 0 80px;
+      text-align: center;
+    }
+
+    .tech h2 {
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .tech > .container > p {
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      font-size: 16px;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .tech-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    footer a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero { padding: 60px 0 40px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .state-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <nav>
+      <a href="#" class="logo">
+        <span class="logo-icon">
+          <svg viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 7.293V1.5A.5.5 0 0 1 8 1zM8 15l3.5-4h-2V8h-3v3h-2L8 15z"/></svg>
+        </span>
+        ClaudePulse
+      </a>
+      <a href="https://github.com/tzangms/claudepulse" class="gh-link">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="badge">macOS Menu Bar App</div>
+      <h1>
+        <span class="gradient">ClaudePulse</span><br>
+        Dynamic Island for Claude Code
+      </h1>
+      <p>即時監控你的 Claude Code sessions。靈感來自 iPhone Dynamic Island，以優雅、不干擾的方式呈現在你的 macOS 螢幕上。</p>
+      <div class="cta-group">
+        <a href="https://github.com/tzangms/claudepulse/releases" class="btn btn-primary">
+          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+          下載 DMG
+        </a>
+        <a href="https://github.com/tzangms/claudepulse" class="btn btn-secondary">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          查看原始碼
+        </a>
+      </div>
+
+      <!-- Demo — Two desktop mockups side by side -->
+      <div class="demo">
+        <div class="demo-states">
+          <div class="demo-state-col">
+            <span class="demo-state-label">Capsule</span>
+          </div>
+          <div class="demo-state-col">
+            <span class="demo-state-label">Expanded on Hover</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 16px; margin-top: 12px;">
+          <!-- Capsule state -->
+          <div class="desktop-mockup" style="flex: 1;">
+            <div class="desktop-bg">
+              <div class="desktop-menubar">
+                <div class="menubar-left">
+                  <span class="menubar-apple"></span>
+                  <span>Finder</span>
+                  <span style="opacity:0.6">File</span>
+                  <span style="opacity:0.6">Edit</span>
+                </div>
+                <div class="menubar-right">
+                  <span class="menubar-sparkle">&#10024;</span>
+                  <span>Thu 3:42 PM</span>
+                </div>
+              </div>
+              <div class="island-container">
+                <div class="island-capsule">
+                  <span class="island-icon">
+                    <svg viewBox="0 0 16 16"><polygon points="8,2 9.5,6 14,6 10.5,9 12,14 8,11 4,14 5.5,9 2,6 6.5,6"/></svg>
+                  </span>
+                  <span class="island-project">claudepulse</span>
+                  <span class="island-state-dot"></span>
+                  <span class="island-time">00:12:34</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Expanded state -->
+          <div class="desktop-mockup" style="flex: 1;">
+            <div class="desktop-bg">
+              <div class="desktop-menubar">
+                <div class="menubar-left">
+                  <span class="menubar-apple"></span>
+                  <span>Finder</span>
+                  <span style="opacity:0.6">File</span>
+                  <span style="opacity:0.6">Edit</span>
+                </div>
+                <div class="menubar-right">
+                  <span class="menubar-sparkle">&#10024;</span>
+                  <span>Thu 3:42 PM</span>
+                </div>
+              </div>
+              <div class="island-expanded">
+                <div class="session-row active">
+                  <span class="session-dot working"></span>
+                  <div class="session-info">
+                    <div class="session-name">claudepulse <span class="session-label working">Working</span></div>
+                    <div class="session-path">~/projects/claudepulse</div>
+                  </div>
+                  <span class="session-time">12:34</span>
+                </div>
+                <div class="session-row">
+                  <span class="session-dot waiting"></span>
+                  <div class="session-info">
+                    <div class="session-name">my-api <span class="session-label waiting">Waiting</span></div>
+                    <div class="session-path">~/projects/my-api</div>
+                  </div>
+                  <span class="session-time">05:21</span>
+                </div>
+                <div class="session-row">
+                  <span class="session-dot idle"></span>
+                  <div class="session-info">
+                    <div class="session-name">webapp</div>
+                    <div class="session-path">~/projects/webapp</div>
+                  </div>
+                  <span class="session-time">32:10</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2>Features</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon purple">&#10024;</div>
+          <h3>Dynamic Island 風格</h3>
+          <p>靈感來自 iPhone，小巧的膠囊 UI 懸浮在螢幕上方，hover 時展開顯示完整 session 資訊。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon orange">&#9889;</div>
+          <h3>即時 Session 追蹤</h3>
+          <p>同時監控多個 Claude Code sessions，即時顯示工作狀態、等待中或閒置狀態。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon blue">&#127912;</div>
+          <h3>優雅的動畫效果</h3>
+          <p>流暢的展開/收合動畫、狀態切換的脈衝效果，以及毛玻璃背景材質。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">&#128274;</div>
+          <h3>完全本地運行</h3>
+          <p>所有資料僅在 localhost 傳輸，不會離開你的電腦。透過 Claude Code hooks 自動整合。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">&#128421;</div>
+          <h3>Menu Bar 整合</h3>
+          <p>系統選單列圖示提供快速控制：顯示/隱藏面板、固定展開、調整位置。</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon orange">&#128736;</div>
+          <h3>零設定</h3>
+          <p>首次啟動自動偵測並設定 Claude Code hooks，開箱即用無需手動配置。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="states">
+    <div class="container">
+      <h2>Session 狀態</h2>
+      <p>一目瞭然地掌握每個 Claude Code session 的即時狀態</p>
+      <div class="state-list">
+        <div class="state-item">
+          <span class="state-dot purple"></span>
+          <div class="state-text">
+            <h4>Working</h4>
+            <p>Claude 正在處理中</p>
+          </div>
+        </div>
+        <div class="state-item">
+          <span class="state-dot orange"></span>
+          <div class="state-text">
+            <h4>Waiting</h4>
+            <p>等待使用者輸入或授權</p>
+          </div>
+        </div>
+        <div class="state-item">
+          <span class="state-dot gray"></span>
+          <div class="state-text">
+            <h4>Idle</h4>
+            <p>Session 閒置中</p>
+          </div>
+        </div>
+        <div class="state-item">
+          <span class="state-dot dim"></span>
+          <div class="state-text">
+            <h4>Stale</h4>
+            <p>超過 10 分鐘無活動</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section class="install">
+    <div class="container">
+      <h2>快速開始</h2>
+      <div class="install-steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div class="step-content">
+            <h4>Clone & Build</h4>
+            <p>從原始碼編譯 ClaudePulse</p>
+            <div class="code-block">
+              git clone https://github.com/tzangms/claudepulse.git<br>
+              cd claudepulse<br>
+              swift build -c release
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div class="step-content">
+            <h4>啟動應用程式</h4>
+            <p>執行編譯好的 binary</p>
+            <div class="code-block">.build/release/ccani</div>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div class="step-content">
+            <h4>設定 Hooks</h4>
+            <p>首次啟動時，ClaudePulse 會自動提示你設定 Claude Code hooks。點選確認即可完成整合。</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">4</span>
+          <div class="step-content">
+            <h4>開始使用</h4>
+            <p>打開 Claude Code 開始工作，ClaudePulse 會自動顯示你的 session 狀態。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech -->
+  <section class="tech">
+    <div class="container">
+      <h2>技術架構</h2>
+      <p>使用原生 macOS 技術打造，輕量高效</p>
+      <div class="tech-tags">
+        <span class="tech-tag">Swift 5.10+</span>
+        <span class="tech-tag">SwiftUI</span>
+        <span class="tech-tag">AppKit</span>
+        <span class="tech-tag">POSIX Sockets</span>
+        <span class="tech-tag">macOS 14+</span>
+        <span class="tech-tag">@Observable</span>
+        <span class="tech-tag">Swift Package Manager</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Built by <a href="https://github.com/tzangms">tzangms</a> &middot; Open Source on <a href="https://github.com/tzangms/claudepulse">GitHub</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
