@@ -21,25 +21,67 @@ class DynamicIslandPanel: NSPanel {
         titlebarAppearsTransparent = true
 
         self.contentView = contentView
-        positionAtTopCenter()
+        repositionForCurrentSettings()
     }
 
-    func positionAtTopCenter() {
+    func repositionForCurrentSettings() {
         guard let screen = NSScreen.main else { return }
         let screenFrame = screen.visibleFrame
-        let x = screenFrame.midX - frame.width / 2
-        let y = screenFrame.maxY - frame.height - 8
-        setFrameOrigin(NSPoint(x: x, y: y))
+        let margin: CGFloat = 12
+
+        let origin: NSPoint
+        switch PanelSettings.shared.position {
+        case .topCenter:
+            origin = NSPoint(
+                x: screenFrame.midX - frame.width / 2,
+                y: screenFrame.maxY - frame.height - 8
+            )
+        case .bottomLeft:
+            origin = NSPoint(
+                x: screenFrame.minX + margin,
+                y: screenFrame.minY + margin
+            )
+        case .bottomRight:
+            origin = NSPoint(
+                x: screenFrame.maxX - frame.width - margin,
+                y: screenFrame.minY + margin
+            )
+        }
+        setFrameOrigin(origin)
     }
 
     func updateFrameForContentSize(_ contentSize: CGSize) {
         guard let screen = NSScreen.main else { return }
-        let topY = frame.origin.y + frame.size.height
-        let newWidth = max(contentSize.width, 200)
+        let screenFrame = screen.visibleFrame
+        let margin: CGFloat = 12
+        let newWidth = max(contentSize.width, 280)
         let newHeight = contentSize.height
-        let x = screen.visibleFrame.midX - newWidth / 2
-        let y = topY - newHeight
-        let newFrame = NSRect(x: x, y: y, width: newWidth, height: newHeight)
-        setFrame(newFrame, display: true)
+
+        let newOrigin: NSPoint
+        switch PanelSettings.shared.position {
+        case .topCenter:
+            let topY = frame.origin.y + frame.size.height
+            newOrigin = NSPoint(
+                x: screenFrame.midX - newWidth / 2,
+                y: topY - newHeight
+            )
+        case .bottomLeft:
+            newOrigin = NSPoint(
+                x: screenFrame.minX + margin,
+                y: screenFrame.minY + margin
+            )
+        case .bottomRight:
+            newOrigin = NSPoint(
+                x: screenFrame.maxX - newWidth - margin,
+                y: screenFrame.minY + margin
+            )
+        }
+
+        let newFrame = NSRect(origin: newOrigin, size: CGSize(width: newWidth, height: newHeight))
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.3
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            self.animator().setFrame(newFrame, display: true)
+        }
     }
 }

@@ -6,6 +6,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var server: HookServer?
     let sessionManager = SessionManager()
     private var clickMonitor: Any?
+    private var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("[ccani] App launched")
@@ -14,6 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startServer()
         print("[ccani] Server started")
         setupClickOutsideMonitor()
+        setupStatusItem()
         print("[ccani] Ready")
     }
 
@@ -61,7 +63,96 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func setupClickOutsideMonitor() {
+    private func setupStatusItem() {
+        let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        if let button = statusItem.button {
+            button.image = NSImage(systemSymbolName: "sparkle", accessibilityDescription: "ccani")
+        }
+
+        let menu = NSMenu()
+        menu.delegate = self
+
+        let showItem = NSMenuItem(title: "Show/Hide Panel", action: #selector(togglePanel), keyEquivalent: "")
+        showItem.target = self
+        menu.addItem(showItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Pin expanded
+        let pinItem = NSMenuItem(title: "Keep Expanded", action: #selector(togglePinExpanded(_:)), keyEquivalent: "")
+        pinItem.target = self
+        pinItem.tag = 100
+        menu.addItem(pinItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        // Position submenu
+        let posMenu = NSMenu()
+        for pos in PanelPosition.allCases {
+            let item = NSMenuItem(title: pos.displayName, action: #selector(changePosition(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = pos.rawValue
+            posMenu.addItem(item)
+        }
+        let posItem = NSMenuItem(title: "Position", action: nil, keyEquivalent: "")
+        posItem.submenu = posMenu
+        menu.addItem(posItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let quitItem = NSMenuItem(title: "Quit ccani", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        statusItem.menu = menu
+        self.statusItem = statusItem
+    }
+
+    @objc private func togglePanel() {
+        guard let panel = panel else { return }
+        if panel.isVisible {
+            panel.orderOut(nil)
+        } else {
+            panel.orderFrontRegardless()
+        }
+    }
+
+    @objc private func togglePinExpanded(_ sender: NSMenuItem) {
+        PanelSettings.shared.pinExpanded.toggle()
+    }
+
+    @objc private func changePosition(_ sender: NSMenuItem) {
+        guard let rawValue = sender.representedObject as? String,
+              let position = PanelPosition(rawValue: rawValue) else { return }
+        PanelSettings.shared.position = position
+        panel?.repositionForCurrentSettings()
+    }
+
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
+    }
+
+}
+
+extension AppDelegate: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        // Update pin checkmark
+        if let pinItem = menu.item(withTag: 100) {
+            pinItem.state = PanelSettings.shared.pinExpanded ? .on : .off
+        }
+        // Update position checkmarks in submenu
+        if let posItem = menu.item(withTitle: "Position"),
+           let posMenu = posItem.submenu {
+            let current = PanelSettings.shared.position.rawValue
+            for item in posMenu.items {
+                item.state = (item.representedObject as? String) == current ? .on : .off
+            }
+        }
+    }
+}
+
+extension AppDelegate {
+    func setupClickOutsideMonitor() {
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { _ in
             NotificationCenter.default.post(name: .ccaniClickOutside, object: nil)
         }
@@ -85,19 +176,27 @@ struct CcaniApp: App {
 
 struct DynamicIslandContent: View {
     let sessionManager: SessionManager
+    let settings = PanelSettings.shared
 
     @State private var isExpanded = false
 
+    private var shouldExpand: Bool {
+        settings.pinExpanded || isExpanded
+    }
+
+    private var cornerRadius: CGFloat {
+        shouldExpand ? 20 : 18
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // Capsule always visible at top
             CapsuleView(
                 session: sessionManager.activeSession,
-                sessionCount: sessionManager.sessions.count
+                sessionCount: sessionManager.sessions.count,
+                activeCount: sessionManager.activeSessionCount
             )
 
-            // Expanded detail grows below capsule
-            if isExpanded {
+            if shouldExpand {
                 ExpandedDetailView(
                     session: sessionManager.activeSession,
                     sessions: sessionManager.sortedSessions,
@@ -105,15 +204,30 @@ struct DynamicIslandContent: View {
                         sessionManager.selectSession(id)
                     }
                 )
-                .transition(.move(edge: .top).combined(with: .opacity))
+                .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
                 .padding(.top, 4)
             }
         }
         .fixedSize()
-        .clipped()
+        .padding(.bottom, shouldExpand ? 4 : 0)
+        .background(
+            .ultraThinMaterial,
+            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .environment(\.colorScheme, .dark)
         .onHover { hovering in
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                isExpanded = hovering
+            if !settings.pinExpanded {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isExpanded = hovering
+                }
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .ccaniClickOutside)) { _ in
+            if !settings.pinExpanded {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+                    isExpanded = false
+                }
             }
         }
     }

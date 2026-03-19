@@ -26,6 +26,10 @@ class SessionManager {
         return sessions.values.first
     }
 
+    var activeSessionCount: Int {
+        sessions.values.filter { $0.isActive }.count
+    }
+
     var sortedSessions: [Session] {
         sessions.values.sorted { a, b in
             // Active sessions first, then by most recent event

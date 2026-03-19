@@ -38,6 +38,7 @@ struct ClaudeIcon: Shape {
 struct CapsuleView: View {
     let session: Session?
     let sessionCount: Int
+    let activeCount: Int
 
     var body: some View {
         HStack(spacing: 8) {
@@ -71,18 +72,28 @@ struct CapsuleView: View {
             }
 
             if sessionCount > 1 {
-                Text("\(sessionCount)")
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.8))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(.white.opacity(0.15), in: Capsule())
+                HStack(spacing: 2) {
+                    if activeCount > 0 {
+                        Text("\(activeCount)")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(Color(red: 0.7, green: 0.4, blue: 1.0))
+                    }
+                    if activeCount > 0 && activeCount < sessionCount {
+                        Text("/")
+                            .font(.system(size: 9, weight: .medium, design: .rounded))
+                            .foregroundStyle(.white.opacity(0.3))
+                    }
+                    Text("\(sessionCount)")
+                        .font(.system(size: 10, weight: activeCount > 0 ? .medium : .bold, design: .rounded))
+                        .foregroundStyle(.white.opacity(activeCount > 0 ? 0.5 : 0.8))
+                }
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(.white.opacity(0.1), in: Capsule())
             }
         }
         .padding(.horizontal, 14)
         .frame(width: 280, height: 36)
-        .background(.ultraThinMaterial, in: Capsule())
-        .environment(\.colorScheme, .dark)
     }
 
     @ViewBuilder
@@ -96,7 +107,7 @@ struct CapsuleView: View {
     private var statusColor: Color {
         switch session?.state ?? .idle {
         case .idle: return .gray
-        case .working: return .purple
+        case .working: return Color(red: 0.7, green: 0.4, blue: 1.0)
         case .waitingForUser: return .orange
         case .stale: return .gray.opacity(0.5)
         }

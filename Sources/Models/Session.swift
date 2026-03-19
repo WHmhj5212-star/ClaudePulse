@@ -7,6 +7,7 @@ class Session: Identifiable {
     var state: SessionState = .idle
     var lastEventTime: Date
     var cwd: String?
+    var lastToolName: String?
 
     init(id: String, cwd: String? = nil) {
         self.id = id
@@ -22,8 +23,13 @@ class Session: Identifiable {
         case "SessionStart":
             state = .idle
             if let cwd = event.cwd { self.cwd = cwd }
-        case "UserPromptSubmit", "PreToolUse", "PostToolUse", "PostToolUseFailure":
+        case "UserPromptSubmit":
             state = .working
+        case "PreToolUse", "PostToolUse", "PostToolUseFailure":
+            state = .working
+            if let toolName = event.toolName {
+                lastToolName = toolName
+            }
         case "PermissionRequest":
             state = .waitingForUser
         case "Stop":
