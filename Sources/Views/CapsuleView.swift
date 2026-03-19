@@ -45,32 +45,42 @@ struct CapsuleView: View {
             claudeIconView
                 .frame(width: 16, height: 16)
 
-            Text(statusText)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.white)
+            if let session = session {
+                Text(session.projectName)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                Text(statusText)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.6))
+            } else {
+                Text("Claude Code")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.6))
+            }
 
             Spacer()
 
-            if session != nil {
+            if let session = session, session.isActive {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    Text(session?.formattedTime ?? "00:00")
+                    Text(session.formattedTime)
                         .font(.system(size: 11, weight: .regular, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.7))
                 }
             }
 
             if sessionCount > 1 {
-                HStack(spacing: 3) {
-                    ForEach(0..<min(sessionCount - 1, 3), id: \.self) { _ in
-                        Circle()
-                            .fill(.white.opacity(0.4))
-                            .frame(width: 4, height: 4)
-                    }
-                }
+                Text("\(sessionCount)")
+                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.white.opacity(0.15), in: Capsule())
             }
         }
         .padding(.horizontal, 14)
-        .frame(width: 200, height: 36)
+        .frame(width: 280, height: 36)
         .background(.ultraThinMaterial, in: Capsule())
         .environment(\.colorScheme, .dark)
     }
@@ -86,8 +96,7 @@ struct CapsuleView: View {
     private var statusColor: Color {
         switch session?.state ?? .idle {
         case .idle: return .gray
-        case .thinking: return .purple
-        case .toolExecuting: return .blue
+        case .working: return .purple
         case .waitingForUser: return .orange
         case .stale: return .gray.opacity(0.5)
         }
@@ -96,8 +105,7 @@ struct CapsuleView: View {
     private var statusText: String {
         switch session?.state ?? .idle {
         case .idle: return "Idle"
-        case .thinking: return "Thinking..."
-        case .toolExecuting: return "Executing..."
+        case .working: return "Working..."
         case .waitingForUser: return "Waiting"
         case .stale: return "Stale"
         }
@@ -124,7 +132,7 @@ struct IconAnimation: ViewModifier {
 
     private var opacity: Double {
         switch state {
-        case .thinking: return isAnimating ? 0.5 : 1.0
+        case .working: return isAnimating ? 0.5 : 1.0
         case .waitingForUser: return isAnimating ? 0.3 : 1.0
         default: return 1.0
         }
@@ -132,26 +140,22 @@ struct IconAnimation: ViewModifier {
 
     private var scale: CGFloat {
         switch state {
-        case .thinking: return isAnimating ? 1.15 : 0.85
-        case .toolExecuting: return isAnimating ? 1.2 : 0.9
+        case .working: return isAnimating ? 1.15 : 0.85
         default: return 1.0
         }
     }
 
     private var rotation: Angle {
         switch state {
-        case .thinking: return isAnimating ? .degrees(180) : .degrees(0)
-        case .toolExecuting: return isAnimating ? .degrees(360) : .degrees(0)
+        case .working: return isAnimating ? .degrees(360) : .degrees(0)
         default: return .degrees(0)
         }
     }
 
     private var animation: Animation? {
         switch state {
-        case .thinking:
+        case .working:
             return .easeInOut(duration: 2.0).repeatForever(autoreverses: true)
-        case .toolExecuting:
-            return .linear(duration: 1.5).repeatForever(autoreverses: false)
         case .waitingForUser:
             return .easeInOut(duration: 0.6).repeatForever(autoreverses: true)
         default:

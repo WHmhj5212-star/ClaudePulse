@@ -32,12 +32,14 @@ class DynamicIslandPanel: NSPanel {
         setFrameOrigin(NSPoint(x: x, y: y))
     }
 
-    func resizeForExpanded(_ expanded: Bool) {
-        let newHeight: CGFloat = expanded ? 240 : 36
-        var newFrame = frame
-        let oldHeight = newFrame.height
-        newFrame.size.height = newHeight
-        newFrame.origin.y -= (newHeight - oldHeight)
-        setFrame(newFrame, display: true, animate: true)
+    func updateFrameForContentSize(_ contentSize: CGSize) {
+        guard let screen = NSScreen.main else { return }
+        let topY = frame.origin.y + frame.size.height
+        let newWidth = max(contentSize.width, 200)
+        let newHeight = contentSize.height
+        let x = screen.visibleFrame.midX - newWidth / 2
+        let y = topY - newHeight
+        let newFrame = NSRect(x: x, y: y, width: newWidth, height: newHeight)
+        setFrame(newFrame, display: true)
     }
 }

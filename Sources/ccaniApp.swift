@@ -25,16 +25,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setupPanel() {
-        let contentView = DynamicIslandContent(
-            sessionManager: sessionManager,
-            onExpandChanged: { [weak self] expanded in
-                self?.panel?.resizeForExpanded(expanded)
-            }
-        )
-        let hostView = NSHostingView(rootView: contentView)
-        hostView.frame = NSRect(x: 0, y: 0, width: 200, height: 36)
+        let contentView = DynamicIslandContent(sessionManager: sessionManager)
+        let hostView = SizeTrackingHostingView(rootView: contentView)
+        hostView.sizingOptions = [.intrinsicContentSize]
 
         let panel = DynamicIslandPanel(contentView: hostView)
+        hostView.onSizeChange = { [weak panel] size in
+            panel?.updateFrameForContentSize(size)
+        }
         panel.orderFrontRegardless()
         self.panel = panel
     }
@@ -87,41 +85,35 @@ struct CcaniApp: App {
 
 struct DynamicIslandContent: View {
     let sessionManager: SessionManager
-    let onExpandChanged: (Bool) -> Void
 
     @State private var isExpanded = false
 
     var body: some View {
         VStack(spacing: 0) {
+            // Capsule always visible at top
+            CapsuleView(
+                session: sessionManager.activeSession,
+                sessionCount: sessionManager.sessions.count
+            )
+
+            // Expanded detail grows below capsule
             if isExpanded {
-                ExpandedView(
+                ExpandedDetailView(
                     session: sessionManager.activeSession,
                     sessions: sessionManager.sortedSessions,
                     onSelectSession: { id in
                         sessionManager.selectSession(id)
                     }
                 )
-                .transition(.scale(scale: 0.9, anchor: .top).combined(with: .opacity))
-            } else {
-                CapsuleView(
-                    session: sessionManager.activeSession,
-                    sessionCount: sessionManager.sessions.count
-                )
-                .transition(.scale(scale: 1.05, anchor: .top).combined(with: .opacity))
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.top, 4)
             }
         }
-        .onTapGesture {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                isExpanded.toggle()
-            }
-            onExpandChanged(isExpanded)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .ccaniClickOutside)) { _ in
-            if isExpanded {
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                    isExpanded = false
-                }
-                onExpandChanged(false)
+        .fixedSize()
+        .clipped()
+        .onHover { hovering in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                isExpanded = hovering
             }
         }
     }

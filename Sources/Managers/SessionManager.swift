@@ -11,12 +11,27 @@ class SessionManager {
     }
 
     var activeSession: Session? {
-        guard let id = activeSessionId else { return sessions.values.first }
-        return sessions[id]
+        // Prefer the user-selected session, but auto-switch to a running one
+        if let id = activeSessionId, let selected = sessions[id], selected.isActive {
+            return selected
+        }
+        // Find any actively running session
+        if let running = sessions.values.first(where: { $0.isActive }) {
+            return running
+        }
+        // Fall back to user-selected or first
+        if let id = activeSessionId, let selected = sessions[id] {
+            return selected
+        }
+        return sessions.values.first
     }
 
     var sortedSessions: [Session] {
-        sessions.values.sorted { $0.startTime < $1.startTime }
+        sessions.values.sorted { a, b in
+            // Active sessions first, then by most recent event
+            if a.isActive != b.isActive { return a.isActive }
+            return a.lastEventTime > b.lastEventTime
+        }
     }
 
     func handleEvent(_ event: HookEvent) {
@@ -48,7 +63,7 @@ class SessionManager {
     }
 
     private func startStalenessCheck() {
-        stalenessTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        stalenessTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
             guard let self else { return }
             self.checkStaleness()
         }
@@ -65,6 +80,8 @@ class SessionManager {
                 }
             } else if elapsed > 600 { // 10 min — mark stale
                 session.state = .stale
+            } else if session.isActive && elapsed > 30 { // 30 sec with no event — back to idle
+                session.state = .idle
             }
         }
     }

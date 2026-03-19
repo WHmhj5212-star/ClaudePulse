@@ -22,18 +22,30 @@ class Session: Identifiable {
         case "SessionStart":
             state = .idle
             if let cwd = event.cwd { self.cwd = cwd }
-        case "UserPromptSubmit":
-            state = .thinking
-        case "PreToolUse":
-            state = .toolExecuting
-        case "PostToolUse", "PostToolUseFailure":
-            state = .thinking
+        case "UserPromptSubmit", "PreToolUse", "PostToolUse", "PostToolUseFailure":
+            state = .working
         case "PermissionRequest":
             state = .waitingForUser
         case "Stop":
             state = .idle
         default:
             break
+        }
+    }
+
+    var projectName: String {
+        if let cwd = cwd {
+            return (cwd as NSString).lastPathComponent
+        }
+        return String(id.prefix(8))
+    }
+
+    var isActive: Bool {
+        switch state {
+        case .working, .waitingForUser:
+            return true
+        default:
+            return false
         }
     }
 

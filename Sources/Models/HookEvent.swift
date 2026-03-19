@@ -18,8 +18,7 @@ struct HookEvent: Decodable {
 
 enum SessionState: String {
     case idle
-    case thinking
-    case toolExecuting = "tool_executing"
+    case working
     case waitingForUser = "waiting_for_user"
     case stale
 }
