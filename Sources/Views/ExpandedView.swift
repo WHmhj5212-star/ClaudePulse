@@ -74,7 +74,7 @@ struct SessionRow: View {
     private var rowStateColor: Color {
         switch session.state {
         case .idle: return .gray
-        case .working: return Color(red: 0.7, green: 0.4, blue: 1.0)
+        case .working: return PanelSettings.shared.accentColor
         case .waitingForUser: return .orange
         case .stale: return .gray.opacity(0.5)
         }

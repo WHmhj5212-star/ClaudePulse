@@ -336,7 +336,7 @@ struct DynamicIslandContent: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(
                         settings.pinExpanded
-                            ? Color(red: 0.7, green: 0.4, blue: 1.0)
+                            ? settings.accentColor
                             : .white.opacity(pinHovered ? 0.8 : 0.35)
                     )
                     .rotationEffect(.degrees(settings.pinExpanded ? 0 : 45))

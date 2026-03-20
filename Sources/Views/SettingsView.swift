@@ -11,8 +11,7 @@ struct SettingsView: View {
     @State private var checkUpdateHovered = false
     @State private var downloadHovered = false
     @State private var quitHovered = false
-
-    private let accentPurple = Color(red: 0.7, green: 0.4, blue: 1.0)
+    @State private var colorHover: AccentTheme?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -108,7 +107,7 @@ struct SettingsView: View {
                     } label: {
                         ZStack {
                             Capsule()
-                                .fill(settings.pinExpanded ? accentPurple : .white.opacity(0.15))
+                                .fill(settings.pinExpanded ? settings.accentColor : .white.opacity(0.15))
                                 .frame(width: 34, height: 20)
 
                             Circle()
@@ -121,6 +120,42 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .onHover { h in
                         toggleHovered = h
+                    }
+                }
+
+                // Accent color selector
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Accent Color")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.45))
+
+                    HStack(spacing: 8) {
+                        ForEach(AccentTheme.allCases, id: \.self) { theme in
+                            let isSelected = settings.accentTheme == theme
+                            let isHovered = colorHover == theme
+
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    settings.accentTheme = theme
+                                }
+                            } label: {
+                                Circle()
+                                    .fill(theme.color)
+                                    .frame(width: 20, height: 20)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(.white, lineWidth: isSelected ? 2 : 0)
+                                            .frame(width: 24, height: 24)
+                                    )
+                                    .scaleEffect(isHovered ? 1.15 : 1.0)
+                            }
+                            .buttonStyle(.plain)
+                            .onHover { h in
+                                withAnimation(.easeInOut(duration: 0.1)) {
+                                    colorHover = h ? theme : nil
+                                }
+                            }
+                        }
                     }
                 }
 

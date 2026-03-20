@@ -76,7 +76,7 @@ struct CapsuleView: View {
                     if activeCount > 0 {
                         Text("\(activeCount)")
                             .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color(red: 0.7, green: 0.4, blue: 1.0))
+                            .foregroundStyle(PanelSettings.shared.accentColor)
                     }
                     if activeCount > 0 && activeCount < sessionCount {
                         Text("/")
@@ -107,7 +107,7 @@ struct CapsuleView: View {
     private var statusColor: Color {
         switch session?.state ?? .idle {
         case .idle: return .gray
-        case .working: return Color(red: 0.7, green: 0.4, blue: 1.0)
+        case .working: return PanelSettings.shared.accentColor
         case .waitingForUser: return .orange
         case .stale: return .gray.opacity(0.5)
         }
