@@ -3,16 +3,27 @@
     <channel>
         <title>ClaudePulse Updates</title>
         <language>en</language>
-        <!--
-            After building a release DMG, generate the appcast entry:
-
-            1. Generate Ed25519 keys (one-time):
-               .build/artifacts/sparkle/Sparkle/bin/generate_keys
-
-            2. Sign the DMG and get the signature + length:
-               .build/artifacts/sparkle/Sparkle/bin/sign_update build/ClaudePulse-X.Y.Z.dmg
-
-            3. Add an <item> below with the version, signature, and download URL.
-        -->
+        <item>
+            <title>Version 0.2.0</title>
+            <pubDate>Thu, 20 Mar 2026 12:00:00 +0800</pubDate>
+            <sparkle:version>0.2.0</sparkle:version>
+            <sparkle:shortVersionString>0.2.0</sparkle:shortVersionString>
+            <description><![CDATA[
+                <ul>
+                    <li>Fix bottom position hover flicker</li>
+                    <li>Add accent color picker (Purple, Cyan, Green, Orange, Pink)</li>
+                    <li>Add panel size setting (S/M/L)</li>
+                    <li>Show latest prompt per session</li>
+                    <li>Darker panel background</li>
+                    <li>Sparkle auto-update support</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.0/ClaudePulse-0.2.0.dmg"
+                length="445082"
+                type="application/octet-stream"
+                sparkle:edSignature="s44J1wf5U3uQeYeusvgDvbirN1PIvMRlSl7t/kGzQ4Pag2fMGf/m/d1CioD6ilCRBvgJsAgVFwIrStOt3Bm7DQ=="
+            />
+        </item>
     </channel>
 </rss>
