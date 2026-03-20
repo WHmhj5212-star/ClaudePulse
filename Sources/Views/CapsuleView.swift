@@ -39,8 +39,10 @@ struct CapsuleView: View {
     let session: Session?
     let sessionCount: Int
     let activeCount: Int
+    private let settings = PanelSettings.shared
 
     var body: some View {
+        let s = settings.textSize.scale
         HStack(spacing: 8) {
             // Claude logo icon with status color and animation
             claudeIconView
@@ -48,16 +50,16 @@ struct CapsuleView: View {
 
             if let session = session {
                 Text(session.projectName)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 12 * s, weight: .semibold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
 
                 Text(statusText)
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 11 * s, weight: .medium))
                     .foregroundStyle(.white.opacity(0.6))
             } else {
                 Text("Pulse")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 12 * s, weight: .medium))
                     .foregroundStyle(.white.opacity(0.6))
             }
 
@@ -66,7 +68,7 @@ struct CapsuleView: View {
             if let session = session, session.isActive {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
                     Text(session.formattedTime)
-                        .font(.system(size: 11, weight: .regular, design: .monospaced))
+                        .font(.system(size: 11 * s, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.7))
                 }
             }
@@ -75,16 +77,16 @@ struct CapsuleView: View {
                 HStack(spacing: 2) {
                     if activeCount > 0 {
                         Text("\(activeCount)")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
-                            .foregroundStyle(PanelSettings.shared.accentColor)
+                            .font(.system(size: 10 * s, weight: .bold, design: .rounded))
+                            .foregroundStyle(settings.accentColor)
                     }
                     if activeCount > 0 && activeCount < sessionCount {
                         Text("/")
-                            .font(.system(size: 9, weight: .medium, design: .rounded))
+                            .font(.system(size: 9 * s, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.3))
                     }
                     Text("\(sessionCount)")
-                        .font(.system(size: 10, weight: activeCount > 0 ? .medium : .bold, design: .rounded))
+                        .font(.system(size: 10 * s, weight: activeCount > 0 ? .medium : .bold, design: .rounded))
                         .foregroundStyle(.white.opacity(activeCount > 0 ? 0.5 : 0.8))
                 }
                 .padding(.horizontal, 6)
@@ -93,7 +95,7 @@ struct CapsuleView: View {
             }
         }
         .padding(.horizontal, 14)
-        .frame(width: 280, height: 36)
+        .frame(width: 280 * s, height: 36 * s)
     }
 
     @ViewBuilder

@@ -4,6 +4,7 @@ struct ExpandedDetailView: View {
     let session: Session?
     let sessions: [Session]
     let onSelectSession: (String) -> Void
+    private let settings = PanelSettings.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -14,17 +15,19 @@ struct ExpandedDetailView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .frame(width: 280)
+        .frame(width: 280 * settings.textSize.scale)
     }
 }
 
 struct SessionRow: View {
     let session: Session
     var isSelected: Bool = false
+    private let settings = PanelSettings.shared
 
     @State private var isHovered = false
 
     var body: some View {
+        let s = settings.textSize.scale
         HStack(spacing: 6) {
             Circle()
                 .fill(rowStateColor)
@@ -32,18 +35,18 @@ struct SessionRow: View {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 4) {
                     Text(session.projectName)
-                        .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                        .font(.system(size: 11 * s, weight: isSelected ? .semibold : .regular))
                         .foregroundStyle(.white.opacity(isSelected ? 1.0 : 0.6))
                         .lineLimit(1)
                     if !rowStateLabel.isEmpty {
                         Text(rowStateLabel)
-                            .font(.system(size: 9, weight: .medium))
+                            .font(.system(size: 9 * s, weight: .medium))
                             .foregroundStyle(rowStateColor.opacity(0.7))
                     }
                 }
                 if let prompt = session.lastPrompt {
                     Text(prompt)
-                        .font(.system(size: 10))
+                        .font(.system(size: 10 * s))
                         .foregroundStyle(.white.opacity(0.3))
                         .lineLimit(1)
                         .truncationMode(.tail)
@@ -53,7 +56,7 @@ struct SessionRow: View {
             if session.isActive {
                 TimelineView(.periodic(from: .now, by: 1)) { _ in
                     Text(session.formattedTime)
-                        .font(.system(size: 10, design: .monospaced))
+                        .font(.system(size: 10 * s, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.35))
                 }
             }

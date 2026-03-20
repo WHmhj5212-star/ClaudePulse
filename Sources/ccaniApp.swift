@@ -266,7 +266,7 @@ struct DynamicIslandContent: View {
             .padding(.bottom, shouldExpand && !expandsUpward ? 4 : 0)
             .padding(.top, shouldExpand && expandsUpward ? 4 : 0)
             .background(
-                .ultraThinMaterial,
+                .regularMaterial,
                 in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             )
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
@@ -310,14 +310,15 @@ struct DynamicIslandContent: View {
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 0) {
+        let s = settings.textSize.scale
+        return HStack(spacing: 0) {
             Spacer()
 
             Button {
                 NotificationCenter.default.post(name: .ccaniOpenSettings, object: nil)
             } label: {
                 Image(systemName: "gearshape")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 11 * s, weight: .medium))
                     .foregroundStyle(.white.opacity(settingsHovered ? 0.8 : 0.35))
                     .frame(width: 24, height: 24)
                     .contentShape(Rectangle())
@@ -333,7 +334,7 @@ struct DynamicIslandContent: View {
                 }
             } label: {
                 Image(systemName: settings.pinExpanded ? "pin.fill" : "pin")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 11 * s, weight: .medium))
                     .foregroundStyle(
                         settings.pinExpanded
                             ? settings.accentColor

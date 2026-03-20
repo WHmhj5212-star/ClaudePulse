@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var downloadHovered = false
     @State private var quitHovered = false
     @State private var colorHover: AccentTheme?
+    @State private var sizeHover: TextSize?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -159,6 +160,42 @@ struct SettingsView: View {
                     }
                 }
 
+                // Text size selector
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Size")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.45))
+
+                    HStack(spacing: 4) {
+                        ForEach(TextSize.allCases, id: \.self) { size in
+                            let isSelected = settings.textSize == size
+                            let isHovered = sizeHover == size
+
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    settings.textSize = size
+                                }
+                            } label: {
+                                Text(size.displayName)
+                                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                                    .foregroundStyle(isSelected ? .white : .white.opacity(isHovered ? 0.7 : 0.45))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                            .fill(isSelected ? .white.opacity(0.12) : .white.opacity(isHovered ? 0.08 : 0.05))
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .onHover { h in
+                                withAnimation(.easeInOut(duration: 0.1)) {
+                                    sizeHover = h ? size : nil
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Divider
                 Rectangle()
                     .fill(.white.opacity(0.08))
@@ -235,9 +272,15 @@ struct SettingsView: View {
                     Button {
                         NSApp.terminate(nil)
                     } label: {
-                        Text("Quit Pulse")
+                        Text("Quit")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(quitHovered ? Color.red : Color.red.opacity(0.7))
+                            .foregroundStyle(quitHovered ? .white : .white.opacity(0.7))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .fill(.white.opacity(quitHovered ? 0.15 : 0.1))
+                            )
                     }
                     .buttonStyle(.plain)
                     .onHover { h in
@@ -250,7 +293,7 @@ struct SettingsView: View {
         .frame(width: 280)
         .fixedSize()
         .background(
-            .ultraThinMaterial,
+            .regularMaterial,
             in: RoundedRectangle(cornerRadius: 16, style: .continuous)
         )
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))

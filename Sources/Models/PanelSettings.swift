@@ -43,6 +43,28 @@ enum AccentTheme: String, CaseIterable {
     }
 }
 
+enum TextSize: String, CaseIterable {
+    case small
+    case medium
+    case large
+
+    var displayName: String {
+        switch self {
+        case .small: return "S"
+        case .medium: return "M"
+        case .large: return "L"
+        }
+    }
+
+    var scale: CGFloat {
+        switch self {
+        case .small: return 0.85
+        case .medium: return 1.0
+        case .large: return 1.15
+        }
+    }
+}
+
 @Observable
 class PanelSettings {
     static let shared = PanelSettings()
@@ -59,6 +81,10 @@ class PanelSettings {
         didSet { UserDefaults.standard.set(accentTheme.rawValue, forKey: "accentTheme") }
     }
 
+    var textSize: TextSize {
+        didSet { UserDefaults.standard.set(textSize.rawValue, forKey: "textSize") }
+    }
+
     var accentColor: Color { accentTheme.color }
 
     private init() {
@@ -67,5 +93,7 @@ class PanelSettings {
         self.pinExpanded = UserDefaults.standard.bool(forKey: "pinExpanded")
         let themeRaw = UserDefaults.standard.string(forKey: "accentTheme") ?? AccentTheme.purple.rawValue
         self.accentTheme = AccentTheme(rawValue: themeRaw) ?? .purple
+        let sizeRaw = UserDefaults.standard.string(forKey: "textSize") ?? TextSize.medium.rawValue
+        self.textSize = TextSize(rawValue: sizeRaw) ?? .medium
     }
 }
