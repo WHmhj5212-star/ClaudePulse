@@ -20,9 +20,9 @@
             ]]></description>
             <enclosure
                 url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.0/ClaudePulse-0.2.0.dmg"
-                length="445082"
+                length="3137120"
                 type="application/octet-stream"
-                sparkle:edSignature="s44J1wf5U3uQeYeusvgDvbirN1PIvMRlSl7t/kGzQ4Pag2fMGf/m/d1CioD6ilCRBvgJsAgVFwIrStOt3Bm7DQ=="
+                sparkle:edSignature="8qBqqQtjEHj3lW9qYYYYLR3NNPNLqkjyW7jjQ9DUm6DaylLlLpl7/YFryb1lt+Njk0me5/ERw54gMpO8/0J4Ag=="
             />
         </item>
     </channel>
