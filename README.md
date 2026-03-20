@@ -45,6 +45,10 @@ swift build -c release
 
 MIT
 
+## Support
+
+<a href="https://www.buymeacoffee.com/tzangms" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48"></a>
+
 ## Author
 
 Built by [@tzangms](https://github.com/tzangms)
