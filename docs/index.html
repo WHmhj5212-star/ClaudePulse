@@ -111,8 +111,30 @@
 
     /* Hero */
     .hero {
-      text-align: center;
       padding: 80px 0 60px;
+    }
+
+    .hero-layout {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+    }
+
+    .hero-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .hero-video {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .hero-video video {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.06);
     }
 
     .badge {
@@ -704,8 +726,11 @@
     footer a:hover { text-decoration: underline; }
 
     /* Responsive */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .hero { padding: 60px 0 40px; }
+      .hero-layout { flex-direction: column; gap: 32px; }
+      .hero-content { text-align: center; }
+      .hero-content .cta-group { justify-content: center; }
       .feature-grid { grid-template-columns: 1fr; }
       .state-list { grid-template-columns: 1fr; }
     }
@@ -729,105 +754,29 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <img src="icon.png" alt="CCPulse" width="128" height="128" style="border-radius: 28px; margin-bottom: 24px;">
-      <br>
-      <div class="badge">macOS Menu Bar App</div>
-      <h1>
-        <span class="gradient">Pulse</span> for Claude Code
-      </h1>
-      <p>Real-time monitoring for your Claude Code sessions. Inspired by iPhone Dynamic Island, elegantly displayed on your macOS screen.</p>
-      <div class="cta-group">
-        <a href="https://github.com/tzangms/ClaudePulse/releases/latest" class="btn btn-primary">
-          <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          Download DMG
-        </a>
-        <a href="https://github.com/tzangms/ClaudePulse" class="btn btn-secondary">
-          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-          Source Code
-        </a>
-      </div>
-
-      <!-- Demo — Two desktop mockups side by side -->
-      <div class="demo">
-        <div class="demo-states">
-          <div class="demo-state-col">
-            <span class="demo-state-label">Capsule</span>
-          </div>
-          <div class="demo-state-col">
-            <span class="demo-state-label">Expanded on Hover</span>
+      <div class="hero-layout">
+        <div class="hero-content">
+          <img src="icon.png" alt="CCPulse" width="96" height="96" style="border-radius: 22px; margin-bottom: 24px;">
+          <div class="badge">macOS Menu Bar App</div>
+          <h1>
+            <span class="gradient">Pulse</span> for Claude Code
+          </h1>
+          <p>Real-time monitoring for your Claude Code sessions. Inspired by iPhone Dynamic Island, elegantly displayed on your macOS screen.</p>
+          <div class="cta-group">
+            <a href="https://github.com/tzangms/ClaudePulse/releases/latest" class="btn btn-primary">
+              <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+              Download DMG
+            </a>
+            <a href="https://github.com/tzangms/ClaudePulse" class="btn btn-secondary">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              Source Code
+            </a>
           </div>
         </div>
-        <div style="display: flex; gap: 16px; margin-top: 12px;">
-          <!-- Capsule state -->
-          <div class="desktop-mockup" style="flex: 1;">
-            <div class="desktop-bg">
-              <div class="desktop-menubar">
-                <div class="menubar-left">
-                  <span class="menubar-apple"></span>
-                  <span>Finder</span>
-                  <span style="opacity:0.6">File</span>
-                  <span style="opacity:0.6">Edit</span>
-                </div>
-                <div class="menubar-right">
-                  <span class="menubar-sparkle">&#10024;</span>
-                  <span>Thu 3:42 PM</span>
-                </div>
-              </div>
-              <div class="island-container">
-                <div class="island-capsule">
-                  <span class="island-icon">
-                    <svg viewBox="0 0 16 16"><polygon points="8,2 9.5,6 14,6 10.5,9 12,14 8,11 4,14 5.5,9 2,6 6.5,6"/></svg>
-                  </span>
-                  <span class="island-project">claudepulse</span>
-                  <span class="island-state-dot"></span>
-                  <span class="island-time">00:12:34</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Expanded state -->
-          <div class="desktop-mockup" style="flex: 1;">
-            <div class="desktop-bg">
-              <div class="desktop-menubar">
-                <div class="menubar-left">
-                  <span class="menubar-apple"></span>
-                  <span>Finder</span>
-                  <span style="opacity:0.6">File</span>
-                  <span style="opacity:0.6">Edit</span>
-                </div>
-                <div class="menubar-right">
-                  <span class="menubar-sparkle">&#10024;</span>
-                  <span>Thu 3:42 PM</span>
-                </div>
-              </div>
-              <div class="island-expanded">
-                <div class="session-row active">
-                  <span class="session-dot working"></span>
-                  <div class="session-info">
-                    <div class="session-name">claudepulse <span class="session-label working">Working</span></div>
-                    <div class="session-path">~/projects/claudepulse</div>
-                  </div>
-                  <span class="session-time">12:34</span>
-                </div>
-                <div class="session-row">
-                  <span class="session-dot waiting"></span>
-                  <div class="session-info">
-                    <div class="session-name">my-api <span class="session-label waiting">Waiting</span></div>
-                    <div class="session-path">~/projects/my-api</div>
-                  </div>
-                  <span class="session-time">05:21</span>
-                </div>
-                <div class="session-row">
-                  <span class="session-dot idle"></span>
-                  <div class="session-info">
-                    <div class="session-name">webapp</div>
-                    <div class="session-path">~/projects/webapp</div>
-                  </div>
-                  <span class="session-time">32:10</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="hero-video">
+          <video autoplay loop muted playsinline>
+            <source src="video.mp4" type="video/mp4">
+          </video>
         </div>
       </div>
     </div>
