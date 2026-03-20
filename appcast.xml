@@ -4,6 +4,24 @@
         <title>ClaudePulse Updates</title>
         <language>en</language>
         <item>
+            <title>Version 0.2.4</title>
+            <pubDate>Thu, 20 Mar 2026 21:30:00 +0800</pubDate>
+            <sparkle:version>0.2.4</sparkle:version>
+            <sparkle:shortVersionString>0.2.4</sparkle:shortVersionString>
+            <description><![CDATA[
+                <ul>
+                    <li>Updated app icon</li>
+                    <li>Added Buy Me a Coffee link in Settings</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.4/ClaudePulse-0.2.4.dmg"
+                length="6976199"
+                type="application/octet-stream"
+                sparkle:edSignature="brwd797n5xpzN2TI8KWFhiK6W6DQQL9WJXjhB8bo0oLA3qujh0Hu0EImrMnCobsAucldr4ra4RT5srsBwfbrDg=="
+            />
+        </item>
+        <item>
             <title>Version 0.2.3</title>
             <pubDate>Thu, 20 Mar 2026 20:30:00 +0800</pubDate>
             <sparkle:version>0.2.3</sparkle:version>
