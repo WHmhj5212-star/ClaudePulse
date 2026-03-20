@@ -4,6 +4,26 @@
         <title>ClaudePulse Updates</title>
         <language>en</language>
         <item>
+            <title>Version 0.2.2</title>
+            <pubDate>Thu, 20 Mar 2026 15:00:00 +0800</pubDate>
+            <sparkle:version>0.2.2</sparkle:version>
+            <sparkle:shortVersionString>0.2.2</sparkle:shortVersionString>
+            <description><![CDATA[
+                <ul>
+                    <li>Settings menu item with ⌘, shortcut</li>
+                    <li>Version number shown in settings title</li>
+                    <li>Sound picker as dropdown with label</li>
+                    <li>UI polish</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.2/ClaudePulse-0.2.2.dmg"
+                length="3338711"
+                type="application/octet-stream"
+                sparkle:edSignature="cXIWttJVD6pmiyKSaIkIlhy3E3S+3oyA6a7NMTt8pHoTmpxSRIneb07Ei5o0DlC4Dth3zwMxRSK4EDSCL3j3AQ=="
+            />
+        </item>
+        <item>
             <title>Version 0.2.1</title>
             <pubDate>Thu, 20 Mar 2026 14:00:00 +0800</pubDate>
             <sparkle:version>0.2.1</sparkle:version>

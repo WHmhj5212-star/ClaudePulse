@@ -21,6 +21,9 @@ struct SettingsView: View {
                 Text("Settings")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white)
+                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?")")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.white.opacity(0.3))
                 Spacer()
                 Button {
                     onClose?()
@@ -188,30 +191,26 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
 
-                // Sound picker (only when sound is enabled)
                 if settings.soundOnComplete {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 4) {
+                    HStack {
+                        Text("Sound")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.white.opacity(0.6))
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { settings.soundName },
+                            set: { newValue in
+                                settings.soundName = newValue
+                                NSSound(named: .init(newValue))?.play()
+                            }
+                        )) {
                             ForEach(PanelSettings.availableSounds, id: \.self) { sound in
-                                let isSelected = settings.soundName == sound
-
-                                Button {
-                                    settings.soundName = sound
-                                    NSSound(named: .init(sound))?.play()
-                                } label: {
-                                    Text(sound)
-                                        .font(.system(size: 10, weight: isSelected ? .semibold : .regular))
-                                        .foregroundStyle(isSelected ? .white : .white.opacity(0.45))
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 5, style: .continuous)
-                                                .fill(isSelected ? .white.opacity(0.12) : .white.opacity(0.05))
-                                        )
-                                }
-                                .buttonStyle(.plain)
+                                Text(sound).tag(sound)
                             }
                         }
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .frame(width: 110)
                     }
                 }
 
