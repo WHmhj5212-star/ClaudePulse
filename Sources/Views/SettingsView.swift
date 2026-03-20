@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var checkUpdateHovered = false
     @State private var downloadHovered = false
     @State private var quitHovered = false
+    @State private var coffeeHovered = false
     @State private var colorHover: AccentTheme?
     @State private var sizeHover: TextSize?
 
@@ -357,9 +358,28 @@ struct SettingsView: View {
                     .fill(.white.opacity(0.08))
                     .frame(height: 0.5)
 
-                // Quit button
+                // Bottom row: Buy Me a Coffee + Quit
                 HStack {
+                    Button {
+                        if let url = URL(string: "https://www.buymeacoffee.com/tzangms") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("☕")
+                                .font(.system(size: 11))
+                            Text("Buy me a coffee")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .foregroundStyle(coffeeHovered ? .white : .white.opacity(0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .onHover { h in
+                        withAnimation(.easeInOut(duration: 0.1)) { coffeeHovered = h }
+                    }
+
                     Spacer()
+
                     Button {
                         NSApp.terminate(nil)
                     } label: {
