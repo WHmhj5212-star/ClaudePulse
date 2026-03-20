@@ -17,5 +17,7 @@
         <key>NSAllowsLocalNetworking</key>
         <true/>
     </dict>
+    <key>SUFeedURL</key>
+    <string>https://api.github.com/repos/tzangms/ccani/releases/latest</string>
 </dict>
 </plist>

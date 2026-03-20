@@ -28,7 +28,7 @@ struct HooksConfigurator {
     func promptAndInstall(port: UInt16) {
         let alert = NSAlert()
         alert.messageText = "Configure Claude Code Hooks?"
-        alert.informativeText = "ccani needs to add hooks to ~/.claude/settings.json to receive events from Claude Code. This will not overwrite your existing hooks."
+        alert.informativeText = "Pulse needs to add hooks to ~/.claude/settings.json to receive events from Claude Code. This will not overwrite your existing hooks."
         alert.addButton(withTitle: "Configure")
         alert.addButton(withTitle: "Skip")
         alert.alertStyle = .informational
@@ -96,7 +96,7 @@ struct HooksConfigurator {
         case malformedSettings
 
         var errorDescription: String? {
-            "~/.claude/settings.json contains malformed JSON. Please fix it manually and restart ccani."
+            "~/.claude/settings.json contains malformed JSON. Please fix it manually and restart Pulse."
         }
     }
 }

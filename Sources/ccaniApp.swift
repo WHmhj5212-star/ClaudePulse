@@ -5,22 +5,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var panel: DynamicIslandPanel?
     var server: HookServer?
     let sessionManager = SessionManager()
+    let updateChecker = UpdateChecker()
     private var clickMonitor: Any?
     private var statusItem: NSStatusItem?
+    private let settingsController = SettingsWindowController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("[ccani] App launched")
+        print("[Pulse] App launched")
         setupPanel()
-        print("[ccani] Panel set up")
+        print("[Pulse] Panel set up")
         startServer()
-        print("[ccani] Server started")
+        print("[Pulse] Server started")
         setupClickOutsideMonitor()
         setupStatusItem()
-        print("[ccani] Ready")
+        updateChecker.startPeriodicCheck()
+        print("[Pulse] Ready")
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         server?.stop()
+        updateChecker.stop()
         if let monitor = clickMonitor {
             NSEvent.removeMonitor(monitor)
         }
@@ -56,7 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         } catch HookServer.ServerError.anotherInstanceRunning {
-            print("Another ccani instance is already running. Exiting.")
+            print("Another Pulse instance is already running. Exiting.")
             NSApp.terminate(nil)
         } catch {
             print("Failed to start server: \(error)")
@@ -66,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "sparkle", accessibilityDescription: "ccani")
+            button.image = NSImage(systemSymbolName: "sparkle", accessibilityDescription: "Pulse")
         }
 
         let menu = NSMenu()
@@ -100,12 +104,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        let quitItem = NSMenuItem(title: "Quit ccani", action: #selector(quitApp), keyEquivalent: "q")
+        // Check for Updates
+        let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "")
+        updateItem.target = self
+        updateItem.tag = 200
+        menu.addItem(updateItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let quitItem = NSMenuItem(title: "Quit Pulse", action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
         statusItem.menu = menu
         self.statusItem = statusItem
+
+        // Listen for open-settings notification from panel buttons
+        NotificationCenter.default.addObserver(self, selector: #selector(openSettingsWindow), name: .ccaniOpenSettings, object: nil)
+        // Listen for reposition notification from settings view
+        NotificationCenter.default.addObserver(self, selector: #selector(repositionPanel), name: .ccaniRepositionPanel, object: nil)
+    }
+
+    @objc private func openSettingsWindow() {
+        settingsController.showSettings(updateChecker: updateChecker)
+    }
+
+    @objc private func repositionPanel() {
+        panel?.repositionForCurrentSettings()
+    }
+
+    @objc private func checkForUpdates() {
+        updateChecker.checkForUpdates()
+        if updateChecker.updateAvailable {
+            updateChecker.openDownloadPage()
+        }
     }
 
     @objc private func togglePanel() {
@@ -148,6 +180,14 @@ extension AppDelegate: NSMenuDelegate {
                 item.state = (item.representedObject as? String) == current ? .on : .off
             }
         }
+        // Update check-for-updates item
+        if let updateItem = menu.item(withTag: 200) {
+            if updateChecker.updateAvailable, let version = updateChecker.latestVersion {
+                updateItem.title = "Update Available (v\(version))..."
+            } else {
+                updateItem.title = "Check for Updates..."
+            }
+        }
     }
 }
 
@@ -161,10 +201,12 @@ extension AppDelegate {
 
 extension Notification.Name {
     static let ccaniClickOutside = Notification.Name("ccaniClickOutside")
+    static let ccaniOpenSettings = Notification.Name("ccaniOpenSettings")
+    static let ccaniRepositionPanel = Notification.Name("ccaniRepositionPanel")
 }
 
 @main
-struct CcaniApp: App {
+struct CcpulseApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -179,6 +221,8 @@ struct DynamicIslandContent: View {
     let settings = PanelSettings.shared
 
     @State private var isExpanded = false
+    @State private var settingsHovered = false
+    @State private var pinHovered = false
 
     private var shouldExpand: Bool {
         settings.pinExpanded || isExpanded
@@ -188,41 +232,52 @@ struct DynamicIslandContent: View {
         shouldExpand ? 20 : 18
     }
 
+    private var expandsUpward: Bool {
+        settings.position == .bottomLeft || settings.position == .bottomRight
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            CapsuleView(
-                session: sessionManager.activeSession,
-                sessionCount: sessionManager.sessions.count,
-                activeCount: sessionManager.activeSessionCount
-            )
-
-            if shouldExpand {
-                ExpandedDetailView(
-                    session: sessionManager.activeSession,
-                    sessions: sessionManager.sortedSessions,
-                    onSelectSession: { id in
-                        sessionManager.selectSession(id)
-                    }
-                )
-                .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
-                .padding(.top, 4)
+            // For bottom positions: Spacer pushes content to bottom
+            // within the fixed-height panel. Spacer doesn't intercept clicks.
+            if expandsUpward {
+                Spacer(minLength: 0)
             }
-        }
-        .fixedSize()
-        .padding(.bottom, shouldExpand ? 4 : 0)
-        .background(
-            .ultraThinMaterial,
-            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .environment(\.colorScheme, .dark)
-        .onHover { hovering in
-            if !settings.pinExpanded {
+
+            // --- Visible content (hover target) ---
+            VStack(spacing: 0) {
+                if shouldExpand && expandsUpward {
+                    expandedContent
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .bottom)))
+                }
+
+                CapsuleView(
+                    session: sessionManager.activeSession,
+                    sessionCount: sessionManager.sessions.count,
+                    activeCount: sessionManager.activeSessionCount
+                )
+
+                if shouldExpand && !expandsUpward {
+                    expandedContent
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                }
+            }
+            .fixedSize()
+            .padding(.bottom, shouldExpand && !expandsUpward ? 4 : 0)
+            .padding(.top, shouldExpand && expandsUpward ? 4 : 0)
+            .background(
+                .ultraThinMaterial,
+                in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .onHover { hovering in
+                if settings.pinExpanded { return }
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                     isExpanded = hovering
                 }
             }
         }
+        .environment(\.colorScheme, .dark)
         .onReceive(NotificationCenter.default.publisher(for: .ccaniClickOutside)) { _ in
             if !settings.pinExpanded {
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
@@ -230,5 +285,93 @@ struct DynamicIslandContent: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var expandedContent: some View {
+        if expandsUpward {
+            // Bottom positions: buttons at top, prompt nearest to capsule
+            actionButtons
+            detailSection
+            promptSection
+        } else {
+            // Top center: prompt at top, buttons at bottom
+            promptSection
+            detailSection
+            actionButtons
+        }
+    }
+
+    @ViewBuilder
+    private var promptSection: some View {
+        if let prompt = sessionManager.activeSession?.lastPrompt {
+            HStack(spacing: 6) {
+                Image(systemName: "text.bubble")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.3))
+                Text(prompt)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .frame(width: 280, alignment: .leading)
+        }
+    }
+
+    private var detailSection: some View {
+        ExpandedDetailView(
+            session: sessionManager.activeSession,
+            sessions: sessionManager.sortedSessions,
+            onSelectSession: { id in
+                sessionManager.selectSession(id)
+            }
+        )
+        .padding(.top, expandsUpward ? 0 : 4)
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 0) {
+            Spacer()
+
+            Button {
+                NotificationCenter.default.post(name: .ccaniOpenSettings, object: nil)
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white.opacity(settingsHovered ? 0.8 : 0.35))
+                    .frame(width: 24, height: 24)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .onHover { h in
+                withAnimation(.easeInOut(duration: 0.15)) { settingsHovered = h }
+            }
+
+            Button {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    settings.pinExpanded.toggle()
+                }
+            } label: {
+                Image(systemName: settings.pinExpanded ? "pin.fill" : "pin")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(
+                        settings.pinExpanded
+                            ? Color(red: 0.7, green: 0.4, blue: 1.0)
+                            : .white.opacity(pinHovered ? 0.8 : 0.35)
+                    )
+                    .rotationEffect(.degrees(settings.pinExpanded ? 0 : 45))
+                    .frame(width: 24, height: 24)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .onHover { h in
+                withAnimation(.easeInOut(duration: 0.15)) { pinHovered = h }
+            }
+        }
+        .padding(.horizontal, 10)
+        .padding(expandsUpward ? .top : .bottom, 2)
     }
 }

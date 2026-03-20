@@ -2,13 +2,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "ccani",
+    name: "ccpulse",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
-            name: "ccani",
+            name: "ccpulse",
             path: "Sources",
             exclude: ["Info.plist"]
+        ),
+        .testTarget(
+            name: "ccpulseTests",
+            dependencies: ["ccpulse"],
+            path: "Tests"
         )
     ]
 )

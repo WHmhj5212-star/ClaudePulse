@@ -56,7 +56,7 @@ struct CapsuleView: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white.opacity(0.6))
             } else {
-                Text("Claude Code")
+                Text("Pulse")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.white.opacity(0.6))
             }

@@ -2,6 +2,11 @@ import SwiftUI
 import AppKit
 
 class DynamicIslandPanel: NSPanel {
+    /// Fixed height for bottom positions — large enough for any expanded content.
+    /// The SwiftUI content is bottom-aligned within this fixed frame,
+    /// eliminating the frame-resize ↔ hover race condition.
+    static let bottomFixedHeight: CGFloat = 400
+
     init(contentView: NSView) {
         super.init(
             contentRect: NSRect(x: 0, y: 0, width: 200, height: 36),
@@ -29,53 +34,42 @@ class DynamicIslandPanel: NSPanel {
         let screenFrame = screen.visibleFrame
         let margin: CGFloat = 12
 
-        let origin: NSPoint
+        let newFrame: NSRect
         switch PanelSettings.shared.position {
         case .topCenter:
-            origin = NSPoint(
+            let origin = NSPoint(
                 x: screenFrame.midX - frame.width / 2,
                 y: screenFrame.maxY - frame.height - 8
             )
-        case .bottomLeft:
-            origin = NSPoint(
-                x: screenFrame.minX + margin,
-                y: screenFrame.minY + margin
-            )
-        case .bottomRight:
-            origin = NSPoint(
-                x: screenFrame.maxX - frame.width - margin,
-                y: screenFrame.minY + margin
+            newFrame = NSRect(origin: origin, size: frame.size)
+        case .bottomLeft, .bottomRight:
+            let width = max(frame.width, 280)
+            let x = PanelSettings.shared.position == .bottomLeft
+                ? screenFrame.minX + margin
+                : screenFrame.maxX - width - margin
+            newFrame = NSRect(
+                x: x,
+                y: screenFrame.minY + margin,
+                width: width,
+                height: Self.bottomFixedHeight
             )
         }
-        setFrameOrigin(origin)
+        setFrame(newFrame, display: true)
     }
 
     func updateFrameForContentSize(_ contentSize: CGSize) {
+        // Bottom positions use a fixed frame — no updates needed.
+        guard PanelSettings.shared.position == .topCenter else { return }
         guard let screen = NSScreen.main else { return }
         let screenFrame = screen.visibleFrame
-        let margin: CGFloat = 12
         let newWidth = max(contentSize.width, 280)
         let newHeight = contentSize.height
 
-        let newOrigin: NSPoint
-        switch PanelSettings.shared.position {
-        case .topCenter:
-            let topY = frame.origin.y + frame.size.height
-            newOrigin = NSPoint(
-                x: screenFrame.midX - newWidth / 2,
-                y: topY - newHeight
-            )
-        case .bottomLeft:
-            newOrigin = NSPoint(
-                x: screenFrame.minX + margin,
-                y: screenFrame.minY + margin
-            )
-        case .bottomRight:
-            newOrigin = NSPoint(
-                x: screenFrame.maxX - newWidth - margin,
-                y: screenFrame.minY + margin
-            )
-        }
+        let topY = frame.origin.y + frame.size.height
+        let newOrigin = NSPoint(
+            x: screenFrame.midX - newWidth / 2,
+            y: topY - newHeight
+        )
 
         let newFrame = NSRect(origin: newOrigin, size: CGSize(width: newWidth, height: newHeight))
         NSAnimationContext.runAnimationGroup { context in

@@ -20,7 +20,7 @@ mkdir -p "${APP_BUNDLE}/Contents/MacOS"
 mkdir -p "${APP_BUNDLE}/Contents/Resources"
 
 # Copy binary
-cp "${BUILD_DIR}/ccani" "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
+cp "${BUILD_DIR}/ccpulse" "${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
 
 # Create Info.plist
 cat > "${APP_BUNDLE}/Contents/Info.plist" << PLIST
@@ -53,6 +53,8 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" << PLIST
     </dict>
     <key>NSAppleEventsUsageDescription</key>
     <string>ClaudePulse needs access to send Apple Events to open Terminal.</string>
+    <key>SUFeedURL</key>
+    <string>https://api.github.com/repos/tzangms/ccani/releases/latest</string>
 </dict>
 </plist>
 PLIST

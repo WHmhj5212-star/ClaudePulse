@@ -8,6 +8,7 @@ class Session: Identifiable {
     var lastEventTime: Date
     var cwd: String?
     var lastToolName: String?
+    var lastPrompt: String?
 
     init(id: String, cwd: String? = nil) {
         self.id = id
@@ -25,6 +26,9 @@ class Session: Identifiable {
             if let cwd = event.cwd { self.cwd = cwd }
         case "UserPromptSubmit":
             state = .working
+            if let prompt = event.prompt {
+                lastPrompt = prompt
+            }
         case "PreToolUse", "PostToolUse", "PostToolUseFailure":
             state = .working
             if let toolName = event.toolName {

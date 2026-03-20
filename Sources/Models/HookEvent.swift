@@ -6,6 +6,7 @@ struct HookEvent: Decodable {
     let cwd: String?
     let toolName: String?
     let notificationType: String?
+    let prompt: String?
 
     enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
@@ -13,6 +14,7 @@ struct HookEvent: Decodable {
         case cwd
         case toolName = "tool_name"
         case notificationType = "notification_type"
+        case prompt
     }
 }
 

@@ -193,7 +193,7 @@ class HookServer {
             case .noAvailablePort:
                 return "No available port in range 19280-19289"
             case .anotherInstanceRunning(let port):
-                return "Another ccani instance is already running on port \(port)"
+                return "Another Pulse instance is already running on port \(port)"
             }
         }
     }
