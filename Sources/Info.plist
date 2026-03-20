@@ -18,7 +18,7 @@
         <true/>
     </dict>
     <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/tzangms/ccani/main/appcast.xml</string>
+    <string>https://raw.githubusercontent.com/tzangms/ClaudePulse/main/appcast.xml</string>
     <key>SUPublicEDKey</key>
     <string>rdWqg6DxZAeugDCqV5pjjUUJck1xNni80UGLubN5wCI=</string>
 </dict>

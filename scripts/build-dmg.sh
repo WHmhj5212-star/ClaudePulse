@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_NAME="ClaudePulse"
 BUNDLE_ID="com.ccani.app"
-VERSION="0.2.2"
+VERSION="0.2.3"
 SIGN_IDENTITY="Developer ID Application: ming hsien tzang (28C55B3F6N)"
 NOTARY_PROFILE="ccani"
 BUILD_DIR=".build/release"
@@ -64,7 +64,7 @@ cat > "${APP_BUNDLE}/Contents/Info.plist" << PLIST
     <key>NSAppleEventsUsageDescription</key>
     <string>ClaudePulse needs access to send Apple Events to open Terminal.</string>
     <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/tzangms/ccani/main/appcast.xml</string>
+    <string>https://raw.githubusercontent.com/tzangms/ClaudePulse/main/appcast.xml</string>
     <key>SUPublicEDKey</key>
     <string>rdWqg6DxZAeugDCqV5pjjUUJck1xNni80UGLubN5wCI=</string>
 </dict>

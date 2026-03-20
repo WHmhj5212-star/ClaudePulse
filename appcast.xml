@@ -4,6 +4,23 @@
         <title>ClaudePulse Updates</title>
         <language>en</language>
         <item>
+            <title>Version 0.2.3</title>
+            <pubDate>Thu, 20 Mar 2026 20:30:00 +0800</pubDate>
+            <sparkle:version>0.2.3</sparkle:version>
+            <sparkle:shortVersionString>0.2.3</sparkle:shortVersionString>
+            <description><![CDATA[
+                <ul>
+                    <li>Fix Sparkle update check (wrong feed URL)</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.3/ClaudePulse-0.2.3.dmg"
+                length="3338627"
+                type="application/octet-stream"
+                sparkle:edSignature="a2katfXt9NkiB2fged5r+KS7YgA6Wx3TjUz/dirDdBa00HoU177aRNnbg1/wFMxQCwQQbTS20t7s04/3X2XRCA=="
+            />
+        </item>
+        <item>
             <title>Version 0.2.2</title>
             <pubDate>Thu, 20 Mar 2026 15:00:00 +0800</pubDate>
             <sparkle:version>0.2.2</sparkle:version>
