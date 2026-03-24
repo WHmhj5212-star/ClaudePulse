@@ -4,6 +4,23 @@
         <title>ClaudePulse Updates</title>
         <language>en</language>
         <item>
+            <title>Version 0.2.5</title>
+            <pubDate>Tue, 24 Mar 2026 21:00:00 +0800</pubDate>
+            <sparkle:version>0.2.5</sparkle:version>
+            <sparkle:shortVersionString>0.2.5</sparkle:shortVersionString>
+            <description><![CDATA[
+                <ul>
+                    <li>Fix UI clipping on different macOS versions</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.5/ClaudePulse-0.2.5.dmg"
+                length="6976665"
+                type="application/octet-stream"
+                sparkle:edSignature="DKjyD9qv0zTZCmTPNg229ejciENzOqYQ4SvfGY/3WCwMDMHHFgAgt1otVIEOjFU/0mABnMyOHnsPFttRixFEAg=="
+            />
+        </item>
+        <item>
             <title>Version 0.2.4</title>
             <pubDate>Thu, 20 Mar 2026 21:30:00 +0800</pubDate>
             <sparkle:version>0.2.4</sparkle:version>
