@@ -14,7 +14,12 @@ class SizeTrackingHostingView<Content: View>: NSHostingView<Content> {
         )
         if fitting != lastReportedSize {
             lastReportedSize = fitting
-            onSizeChange?(fitting)
+            // Defer to next run loop iteration to avoid re-entrant constraint updates
+            // that crash in _postWindowNeedsUpdateConstraints during the display cycle
+            let callback = onSizeChange
+            DispatchQueue.main.async {
+                callback?(fitting)
+            }
         }
     }
 
