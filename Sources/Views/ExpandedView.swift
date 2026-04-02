@@ -23,6 +23,7 @@ struct SessionRow: View {
     let session: Session
     var isSelected: Bool = false
     private let settings = PanelSettings.shared
+    @Environment(\.panelVisible) private var panelVisible
 
     @State private var isHovered = false
 
@@ -53,8 +54,8 @@ struct SessionRow: View {
                 }
             }
             Spacer()
-            if session.isActive {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
+            if session.isActive, panelVisible {
+                TimelineView(.periodic(from: .now, by: 3)) { _ in
                     Text(session.formattedTime)
                         .font(.system(size: 10 * s, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.35))

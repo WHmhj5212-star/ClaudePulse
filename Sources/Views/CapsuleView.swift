@@ -40,6 +40,7 @@ struct CapsuleView: View {
     let sessionCount: Int
     let activeCount: Int
     private let settings = PanelSettings.shared
+    @Environment(\.panelVisible) private var panelVisible
 
     var body: some View {
         let s = settings.textSize.scale
@@ -65,8 +66,8 @@ struct CapsuleView: View {
 
             Spacer()
 
-            if let session = session, session.isActive {
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
+            if let session = session, session.isActive, panelVisible {
+                TimelineView(.periodic(from: .now, by: 3)) { _ in
                     Text(session.formattedTime)
                         .font(.system(size: 11 * s, design: .monospaced))
                         .foregroundStyle(.white.opacity(0.7))
@@ -134,7 +135,6 @@ struct IconAnimation: ViewModifier {
         content
             .opacity(opacity)
             .scaleEffect(scale)
-            .rotationEffect(rotation)
             .onAppear { isAnimating = true }
             .onChange(of: state) { _, _ in
                 isAnimating = false
@@ -153,24 +153,17 @@ struct IconAnimation: ViewModifier {
 
     private var scale: CGFloat {
         switch state {
-        case .working: return isAnimating ? 1.15 : 0.85
+        case .working: return isAnimating ? 1.1 : 0.9
         default: return 1.0
-        }
-    }
-
-    private var rotation: Angle {
-        switch state {
-        case .working: return isAnimating ? .degrees(360) : .degrees(0)
-        default: return .degrees(0)
         }
     }
 
     private var animation: Animation? {
         switch state {
         case .working:
-            return .easeInOut(duration: 2.0).repeatForever(autoreverses: true)
+            return .easeInOut(duration: 2.5).repeatForever(autoreverses: true)
         case .waitingForUser:
-            return .easeInOut(duration: 0.6).repeatForever(autoreverses: true)
+            return .easeInOut(duration: 1.2).repeatForever(autoreverses: true)
         default:
             return nil
         }

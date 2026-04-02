@@ -224,6 +224,17 @@ struct CcpulseApp: App {
     }
 }
 
+private struct PanelVisibleKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var panelVisible: Bool {
+        get { self[PanelVisibleKey.self] }
+        set { self[PanelVisibleKey.self] = newValue }
+    }
+}
+
 struct DynamicIslandContent: View {
     let sessionManager: SessionManager
     let settings = PanelSettings.shared
@@ -231,6 +242,7 @@ struct DynamicIslandContent: View {
     @State private var isExpanded = false
     @State private var settingsHovered = false
     @State private var pinHovered = false
+    @State private var isPanelVisible = true
 
     private var shouldExpand: Bool {
         settings.pinExpanded || isExpanded
@@ -286,6 +298,11 @@ struct DynamicIslandContent: View {
             }
         }
         .environment(\.colorScheme, .dark)
+        .environment(\.panelVisible, isPanelVisible)
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didChangeOcclusionStateNotification)) { note in
+            guard let window = note.object as? DynamicIslandPanel else { return }
+            isPanelVisible = window.occlusionState.contains(.visible)
+        }
         .onReceive(NotificationCenter.default.publisher(for: .ccaniClickOutside)) { _ in
             if !settings.pinExpanded {
                 withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
