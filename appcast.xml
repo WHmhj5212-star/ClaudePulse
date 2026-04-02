@@ -4,6 +4,23 @@
         <title>ClaudePulse Updates</title>
         <language>en</language>
         <item>
+            <title>Version 0.2.6</title>
+            <pubDate>Thu, 02 Apr 2026 08:30:00 +0800</pubDate>
+            <sparkle:version>0.2.6</sparkle:version>
+            <sparkle:shortVersionString>0.2.6</sparkle:shortVersionString>
+            <description><![CDATA[
+                <ul>
+                    <li>Fix crash on launch caused by re-entrant constraint updates</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://github.com/tzangms/ClaudePulse/releases/download/v0.2.6/ClaudePulse-0.2.6.dmg"
+                length="6973491"
+                type="application/octet-stream"
+                sparkle:edSignature="4MOkHPJdNsYa0JJARvL2sw2gPV0s5JJ/jj8kARpwiKvxsNFkAoHcWYTrC12F1PzH9lHOBdfJW9CT4dC7H7DqAQ=="
+            />
+        </item>
+        <item>
             <title>Version 0.2.5</title>
             <pubDate>Tue, 24 Mar 2026 21:00:00 +0800</pubDate>
             <sparkle:version>0.2.5</sparkle:version>
